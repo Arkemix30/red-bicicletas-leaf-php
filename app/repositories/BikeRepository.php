@@ -1,52 +1,55 @@
 <?php
 
-use App\Models\Bike;
-use App\Repositories\StorageInterface;
+namespace App\Repositories;
 
-class BikeRepository implements StorageInterface
+use App\Models\Bike;
+use App\Repositories\BikeInterface;
+
+class BikeRepository implements BikeInterface
 {
     public function all()
     {
         return Bike::all();
     }
 
-    public function find($id)
+    public function find($id): ?Bike
     {
         return Bike::find($id);
     }
 
-    public function create($data)
+    public function create(Bike $incoming_data): ?Bike
     {
-        $bike = new Bike;
-        $bike->model = $data['model'];
-        $bike->color = $data['color'];
-        $bike->description = $data['description'];
-        $bike->rent_price = $data['rent_price'];
-        $bike->image = $data['image'];
-        $bike->lat = $data['lat'];
-        $bike->lng = $data['lng'];
-        $bike->save();
-        return $bike;
+        try {
+            $incoming_data->save();
+            return $incoming_data;
+        } catch (\Exception $e) {
+            print_r("Repo: {$e->getMessage()}");
+            return null;
+        }
     }
 
-    public function update($id, $data)
+    public function update(Bike $bike_in_db): ?Bike
     {
-        $bike = Bike::find($id);
-        $bike->model = $data['model'];
-        $bike->color = $data['color'];
-        $bike->description = $data['description'];
-        $bike->rent_price = $data['rent_price'];
-        $bike->image = $data['image'];
-        $bike->lat = $data['lat'];
-        $bike->lng = $data['lng'];
-        $bike->save();
-        return $bike;
+        try {
+            $bike_in_db->save();
+            return $bike_in_db;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
-    public function delete($id)
+    public function delete(int $id): ?Bike
     {
-        $bike = Bike::find($id);
-        $bike->delete();
-        return $bike;
+        $bike_in_db = Bike::find($id);
+        if (!$bike_in_db) {
+            return null;
+        }
+
+        try {
+            $bike_in_db->delete();
+            return $bike_in_db;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
